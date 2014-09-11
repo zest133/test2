@@ -1,0 +1,75 @@
+*{
+	margin: 0px;
+	padding: 0px;
+}
+
+#left, #right {
+	float:left;
+	display: inline-block;	
+}
+
+#tocDiv {
+	width: 300px;
+	height: 800px;	
+	padding: 5px;
+	overflow-y: auto;
+}
+
+#imageDiv {
+	width: 500px;
+	height: 500px;
+	background-color: grey;
+}
+
+#contentDiv {
+	width: 500px;
+	height: 300px;
+	//border: red solid 1px;
+	padding: 20px;
+	margin-left: 10px;
+}
+
+.accordionHeader0 {
+	cursor: pointer;
+	background-color: orange;
+	margin: 5px;
+	padding: 5px;
+}
+
+.accordionHeader1 {
+	cursor: pointer;
+	background-color: gold;
+	margin: 5px 5px 5px 0px;
+	padding: 5px;
+}
+
+.accordionContent {
+	cursor: pointer;
+	margin-left:30px;
+	background-color: yellow;
+	margin: 5px;
+	padding: 5px;
+}
+
+.accordionContents > * {
+	margin-left:30px;
+}
+
+.ac_hidden .accordionContents {
+	display: none;
+}
+
+.buttonOn{
+	fill:red;
+	opacity: 0.4;
+	
+}
+
+path {
+	stroke-width:0;
+}
+
+path:hover {
+	fill: yellow;
+	opacity: 0.3;
+}

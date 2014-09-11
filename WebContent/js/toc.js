@@ -1,0 +1,249 @@
+var Toc = {
+	
+};
+
+Toc.buildToc = function(){
+	var tocData = totalData;
+	var tocHtml = "";
+	tocHtml += Toc.addToc(tocData, 0);
+	tocHtml = "<div id='accordion'>" + tocHtml + "</div>";
+	$("#tocDiv").html(tocHtml);
+};
+
+Toc.addToc = function (data, level){
+	var returnVal = "";	
+	for(var i = 0; i < data.length; i ++){
+		returnVal += this.createTocItem(data, i, level);
+	}
+	return returnVal;
+};
+
+Toc.createTocItem = function(data, index, level){
+	var returnVal = "";
+	var pageTitle = data[index].title;	
+	var subObj = data[index].child;	
+	var contentType = data[index].contentType;
+	
+	if(subObj != "null"){
+		returnVal =
+			"<section class='ac_hidden'>" +
+				"<h1 class='accordionHeader" + level + "' onclick=\"Toc.showContent(this)\">" + pageTitle + "</h1>" +
+				"<div class='accordionContents'>" +
+					//Toc.addToc(subObj) +
+				"</div>"+
+			"</section>";
+	}else{
+		returnVal = 
+			"<div class='accordionContent' onclick=\"Toc.showContent(this)\">" +
+				pageTitle +
+			"</div>";
+	}
+	return returnVal;
+};
+
+Toc.onActivate = function(elem){
+	$(elem).parents().siblings("section").children(".accordionContents").html("");
+	
+	var currentTitle = $(elem).text();
+	
+	//alert(currentTitle);
+	
+	if($(elem).parents().attr("class") == "ac_hidden"){
+		$("section").removeClass("ac_open");
+		$("section").addClass("ac_hidden");
+		$(elem).parents("section").removeClass("ac_hidden");
+		$(elem).parents("section").addClass("ac_open");
+		
+		if(currentTitle != undefined && currentTitle != null){
+			var subObj = Toc.getCurrentObj(totalData, currentTitle);
+			var level = $(elem).parents(".accordionContents").length + 1;
+			$(elem).siblings(".accordionContents").html(Toc.addToc(subObj, level));
+			//Toc.setAccordionEvent();
+			
+			Toc.setAccordionEvent(".accordionHeader" + level);
+		}
+		
+	}else{
+		$(elem).parent("section").removeClass("ac_open");
+		$(elem).parent("section").addClass("ac_hidden");
+		$(elem).siblings(".accordionContents").html("");	
+	}
+	//setTimeout(Toc.setAccordionEvent, 500);
+	
+};
+
+Toc.setAccordionEvent = function(selector){
+	//$(".accordionHeader").unbind("click");
+	$(selector).bind("click", function(e) {
+			e.preventDefault();
+			Toc.onActivate(this);
+	});
+};
+
+/*
+Toc.onActivate = function(event, ui){
+	
+	if(ui.oldPanel.length == 0 || ui.oldHeader.attr("id") != ui.newHeader.attr("id")){
+		//accordion open
+		
+		if(Common.currentTab == "menuTabToc"){
+			if(ui.newHeader.attr("id") == undefined){
+				ManualKeyEvent.currentIndex = ui.oldHeader.attr("id").split("_")[1];
+			}else{
+				var newIndex = ui.newHeader.attr("id").split("_")[1];
+				ManualKeyEvent.currentIndex = newIndex;
+			}	
+		}
+		ui.oldPanel.html("");
+		
+		var selectKey = ui.newHeader.attr("id");
+		
+		if(selectKey != undefined && selectKey != null){
+			var tocData = Common.getJsonData("tocData");
+			var subObj = tocData[selectKey][2];
+			ui.newPanel.html(Toc.addToc(subObj, 1));
+		}
+		
+	}else{
+		//accordion close
+		ui.oldPanel.html("");
+	}
+	
+	if(Toc.initFlag){
+		ManualKeyEvent.setFocus(1, true, CommonClassName);
+		ManualKeyEvent.tocKeyListener.pressEnterKey(1);
+		ManualKeyEvent.currentIndex = 1;
+		Toc.initFlag = false;
+
+		$(".tabbed-area").fadeIn("slow");
+		$(".contents-area").fadeIn("slow");
+		$(".breadcrumb").fadeIn("slow");
+		$(".function-key").fadeIn("slow");
+	}
+
+	//
+	if(!Toc.buildFlag){
+		var list = $(CommonClassName);
+		for(var i = 0; i < list.length; i ++){
+			var item = list.eq(i);
+			if(item.find("a").attr("href") == Common.currentUrl){
+				ManualKeyEvent.currentIndex = i;
+			}
+		}
+		ManualKeyEvent.setFocus(ManualKeyEvent.currentIndex, true,CommonClassName);
+		Toc.buildFlag = true;
+	}
+	
+
+	
+	
+};
+*/
+Toc.openCurrentAccordion = function(pageUrl){
+	var currentKey = Toc.getCurrentPageKey(Common.getJsonData("tocData"), pageUrl);	
+	var chapterKey = currentKey.split("|")[0];	
+	var chapterIndex = parseInt(chapterKey.split("_")[1]);
+	
+	//$("#accordion").accordion({active: chapterIndex});
+	Toc.onActivate($("#accordion section h1").eq(chapterIndex));
+	
+	//ManualKeyEvent.setFocus(currentIndex, true, CommonClassName);
+	
+}
+
+Toc.getCurrentPageKey = function (data, pageUrl){	
+	var returnVal = "";
+	for(var key in data){
+		if(returnVal != ""){
+			break;
+		}
+		var pagePath = data[key][1];		
+		
+		if(pagePath == pageUrl){
+			returnVal = key;			
+		}else{
+			if(data[key][2] != "null"){
+				returnVal = this.getCurrentPageKey(data[key][2], pageUrl);
+			}			
+		}
+	}
+	return returnVal;
+};
+
+
+Toc.getCurrentObj = function(tocData, currentTitle){
+	var returnVal = null;
+	for(var i = 0; i < tocData.length; i ++){
+		if(returnVal != null){
+			break;
+		}
+		var pageTitle = tocData[i].title;
+		var subObj = tocData[i].child;
+		if(pageTitle.toLowerCase() == currentTitle.toLowerCase()){
+			returnVal = subObj;
+			break;
+		}else{
+			if(subObj != "null"){
+				returnVal = Toc.getCurrentObj(subObj, currentTitle);
+			}
+		}
+	}
+	
+	return returnVal;
+};
+
+
+Toc.showContent = function(elem){
+	
+	var currentTitle = $(elem).text();
+	var contentArray = Toc.getCurrentContent(totalData, currentTitle);
+	
+	var contentType = contentArray[0];
+	var contents = contentArray[1];
+	
+	var htmlText = "";
+	
+	if(contentType != null){
+		if(contentType == "content"){
+			for(var i = 0; i < contents.length; i ++){
+				htmlText += "<p>" + contents[i] + "</p>";
+			}
+		}else{
+			htmlText += "<ol>";
+			
+			for(var i = 0; i < contents.length; i ++){
+				htmlText +="<li>" + contents[i] + "</li>";
+			}
+			
+			htmlText += "</ol>";
+		}
+	}
+	
+	$("#contentDiv").html(htmlText);
+	
+};
+
+Toc.getCurrentContent = function(tocData, currentTitle){
+	var returnVal = [];
+	for(var i = 0; i < tocData.length; i ++){
+		if(returnVal.length != 0){
+			break;
+		}
+		var pageTitle = tocData[i].title;
+		var contentType = tocData[i].contentType;
+		var content = tocData[i].content;
+		var subObj = tocData[i].child;
+				
+		if(pageTitle.toLowerCase() == currentTitle.toLowerCase()){
+			returnVal = [contentType, content];
+			break;
+		}else{
+			if(subObj != "null"){
+				returnVal = Toc.getCurrentContent(subObj, currentTitle);
+			}
+		}
+		
+	}
+	
+	return returnVal;
+};

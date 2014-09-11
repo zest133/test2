@@ -1,0 +1,14 @@
+function svgInit(){
+	var buttons = document.getElementsByTagName("path");
+	
+	for(var i = 0; i < buttons.length; i ++){
+		
+	}
+}
+
+
+function setHighlight(buttonsArray){
+	for(var i = 0; i < buttonsArray.length; i ++){
+		document.getElementById(buttonsArray[i]).setAttribute("fill", "yellow");
+	}
+}
